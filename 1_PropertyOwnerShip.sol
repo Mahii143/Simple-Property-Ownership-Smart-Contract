@@ -103,5 +103,3 @@ contract PropertyOwnerShip {
         return true;
     }
 }
-
-// 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2, "Test Property", 5000000000000000000
