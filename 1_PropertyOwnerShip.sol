@@ -3,7 +3,7 @@ pragma solidity >=0.7.0 <0.9.0;
 
 contract PropertyOwnerShip {
     uint256 public id = 1;
-    address payable public sc_owner;
+    address payable public immutable sc_owner;
 
     constructor() {
         sc_owner = payable(msg.sender);
@@ -23,13 +23,9 @@ contract PropertyOwnerShip {
 
     mapping(uint256 => Property) public assets;
 
-    function addProperty(
-        address payable _owner,
-        string memory _details,
-        uint256 _rate
-    ) public {
+    function addProperty(string memory _details, uint256 _rate) public {
         asset.propertyID = id;
-        asset.owner = _owner;
+        asset.owner = payable(msg.sender);
         asset.details = _details;
         asset.rate = _rate;
         assets[id] = asset;
@@ -38,12 +34,11 @@ contract PropertyOwnerShip {
 
     function updateProperty(
         uint256 _propertyID,
-        address payable _owner,
         string memory _details,
         uint256 _rate
     ) public {
         asset.propertyID = _propertyID;
-        asset.owner = _owner;
+        asset.owner = payable(msg.sender);
         asset.details = _details;
         asset.rate = _rate;
         assets[_propertyID] = asset;
@@ -67,12 +62,9 @@ contract PropertyOwnerShip {
         payable(msg.sender).transfer(balance);
     }
 
-    function receivePayment(uint256 _propertyID, address payable _owner)
-        public
-        payable
-    {
+    function buyProperty(uint256 _propertyID) public payable {
         uint256 amount = msg.value;
-        bool result = changeOwnerShip(_propertyID, _owner, amount);
+        bool result = changeOwnerShip(_propertyID, payable(msg.sender), amount);
         if (!result) {
             refundPayment(amount);
         }
@@ -82,7 +74,7 @@ contract PropertyOwnerShip {
         uint256 _propertyID,
         address payable _owner,
         uint256 amount
-    ) public returns (bool) {
+    ) private returns (bool) {
         if (assets[_propertyID].rate == amount) {
             //change owner and transact money to him
             address payable prevOwner = assets[_propertyID].owner;
@@ -97,7 +89,6 @@ contract PropertyOwnerShip {
                 address payable prevOwner = assets[_propertyID].owner;
                 assets[_propertyID].owner = _owner;
                 payable(prevOwner).transfer(assets[_propertyID].rate);
-                
             } else return false;
         }
         return true;
