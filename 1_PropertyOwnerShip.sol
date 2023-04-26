@@ -2,7 +2,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 contract PropertyOwnerShip {
-    uint256 public id = 1;
+    uint256 public id = 0;
     address payable public immutable sc_owner;
 
     constructor() {
@@ -11,6 +11,9 @@ contract PropertyOwnerShip {
 
     function addId() public {
         id = id + 1;
+    }
+    function decId() public {
+        id = id - 1;
     }
 
     struct Property {
@@ -37,8 +40,10 @@ contract PropertyOwnerShip {
         string memory _details,
         uint256 _rate
     ) public {
+
+        require(assets[_propertyID].owner == msg.sender ,"You are not the owner!");
+
         asset.propertyID = _propertyID;
-        asset.owner = payable(msg.sender);
         asset.details = _details;
         asset.rate = _rate;
         assets[_propertyID] = asset;
@@ -46,13 +51,18 @@ contract PropertyOwnerShip {
     }
 
     function removeProperty(uint256 _propertyID) public {
+        require(assets[_propertyID].owner == msg.sender ,"You are not the owner!");
         delete assets[_propertyID];
     }
 
     function viewAllProperties() public view returns (Property[] memory) {
+        uint256 x = 0;
         Property[] memory propertyList = new Property[](id);
-        for (uint256 i = 1; i <= id; i++) {
-            propertyList[i - 1] = assets[i];
+        for (uint256 i = 0; i < id; i++) {
+            if(assets[i].propertyID != 0){
+                propertyList[x] = assets[i];
+                x++;
+            } 
         }
         return propertyList;
     }
@@ -84,7 +94,6 @@ contract PropertyOwnerShip {
             if (assets[_propertyID].rate > amount) {
                 uint256 refundable = amount - assets[_propertyID].rate;
                 refundPayment(refundable);
-
                 //change owner and transact money to him
                 address payable prevOwner = assets[_propertyID].owner;
                 assets[_propertyID].owner = _owner;
@@ -94,3 +103,5 @@ contract PropertyOwnerShip {
         return true;
     }
 }
+
+// 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2, "Test Property", 5000000000000000000
