@@ -5,6 +5,16 @@ contract PropertyOwnerShip {
     uint256 public id = 0;
     address payable public immutable sc_owner;
 
+    struct Property {
+        uint256 propertyID;
+        address payable owner;
+        string details;
+        uint256 rate;
+    }
+    Property asset;
+
+    mapping(uint256 => Property) public assets;
+
     constructor() {
         sc_owner = payable(msg.sender);
     }
@@ -15,16 +25,6 @@ contract PropertyOwnerShip {
     function decId() public {
         id = id - 1;
     }
-
-    struct Property {
-        uint256 propertyID;
-        address payable owner;
-        string details;
-        uint256 rate;
-    }
-    Property asset;
-
-    mapping(uint256 => Property) public assets;
 
     function addProperty(string memory _details, uint256 _rate) public {
         asset.propertyID = id;
@@ -53,18 +53,6 @@ contract PropertyOwnerShip {
     function removeProperty(uint256 _propertyID) public {
         require(assets[_propertyID].owner == msg.sender ,"You are not the owner!");
         delete assets[_propertyID];
-    }
-
-    function viewAllProperties() public view returns (Property[] memory) {
-        uint256 x = 0;
-        Property[] memory propertyList = new Property[](id);
-        for (uint256 i = 0; i < id; i++) {
-            if(assets[i].propertyID != 0){
-                propertyList[x] = assets[i];
-                x++;
-            } 
-        }
-        return propertyList;
     }
 
     function refundPayment(uint256 amount) public {
@@ -101,6 +89,18 @@ contract PropertyOwnerShip {
             } else return false;
         }
         return true;
+    }
+    
+    function viewAllProperties() public view returns (Property[] memory) {
+        uint256 x = 0;
+        Property[] memory propertyList = new Property[](id);
+        for (uint256 i = 0; i < id; i++) {
+            if(assets[i].propertyID != 0){
+                propertyList[x] = assets[i];
+                x++;
+            } 
+        }
+        return propertyList;
     }
 }
 
